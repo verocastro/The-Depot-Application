@@ -1,15 +1,38 @@
 class ProductsController < ApplicationController
-  before_action :set_product, only: [:show, :edit, :update, :destroy]
-
+before_action only: [:show, :edit, :update, :destroy]
   # GET /products
   # GET /products.json
+
+  def who_bought
+    @product = Product.find(params[:id])
+    @latest_order = @product.orders.order(:updated_at).last
+    if stale?(@latest_order)
+      respond_to do |format|
+        format.html
+        format.xml 
+        format.atom
+        format.json { render json: @product.to_json(include: :orders) }
+      end
+    end
+  end
+
+
   def index
     @products = Product.all
+    respond_to do |format|
+      format.html # new.html.erb
+      format.json { render json: @product }
+    end
   end
 
   # GET /products/1
   # GET /products/1.json
   def show
+    @product = set_product
+    respond_to do |format|
+      format.html # new.html.erb
+      format.json { render json: @product }
+    end
   end
 
   # GET /products/new
@@ -19,19 +42,20 @@ class ProductsController < ApplicationController
 
   # GET /products/1/edit
   def edit
+    @product = set_product
   end
 
   # POST /products
   # POST /products.json
   def create
-    @product = Product.new(product_params)
+    @product = Product.new(params[:product])
 
     respond_to do |format|
       if @product.save
         format.html { redirect_to @product, notice: 'Product was successfully created.' }
         format.json { render action: 'show', status: :created, location: @product }
       else
-        format.html { render action: 'new' }
+        format.html { render action: 'new'}
         format.json { render json: @product.errors, status: :unprocessable_entity }
       end
     end
@@ -40,6 +64,7 @@ class ProductsController < ApplicationController
   # PATCH/PUT /products/1
   # PATCH/PUT /products/1.json
   def update
+    @product = set_product
     respond_to do |format|
       if @product.update(product_params)
         format.html { redirect_to @product, notice: 'Product was successfully updated.' }
@@ -54,6 +79,7 @@ class ProductsController < ApplicationController
   # DELETE /products/1
   # DELETE /products/1.json
   def destroy
+    @product = set_product
     @product.destroy
     respond_to do |format|
       format.html { redirect_to products_url }

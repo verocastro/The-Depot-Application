@@ -7,7 +7,7 @@ class ProductsControllerTest < ActionController::TestCase
     @update = {
       title:       'Lorem Ipsum',
       description: 'Wibbles are fun!',
-      image_url:   'lorem.jpg',
+      image_url:   'ruby.jpg',
       price:       19.95
     }
 
@@ -53,5 +53,11 @@ class ProductsControllerTest < ActionController::TestCase
     end
 
     assert_redirected_to products_path
+  end
+
+   test "should require login" do
+    logout
+    get :index
+    assert_redirected_to login_path
   end
 end
